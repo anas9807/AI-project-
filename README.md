@@ -1,6 +1,6 @@
 # Cyber Threat Intelligence Classification System
 
-A machine learning-powered web application for classifying cyber threats into categories: DDoS, Malware, XSS, Ransomware, SQL Injection, and Phishing.
+A machine learning-powered web application for classifying cyber threats into categories: Malware, XSS and SQL Injection
 
 ## 🚀 Features
 
@@ -104,11 +104,6 @@ The application will start on `http://localhost:5000`
 
 ## 📊 Example Inputs
 
-### DDoS Attack
-```
-Massive traffic spike detected from multiple IP addresses overwhelming server
-```
-
 ### Malware
 ```
 Suspicious file detected: trojan.exe attempting to modify system files
@@ -119,20 +114,13 @@ Suspicious file detected: trojan.exe attempting to modify system files
 <script>alert('XSS')</script> found in user input field
 ```
 
-### Ransomware
-```
-Files encrypted with .locked extension. Ransom note demanding payment
-```
 
 ### SQL Injection
 ```
 User input: ' OR '1'='1' -- detected in login form
 ```
 
-### Phishing
-```
-Email from fake-bank@suspicious.com requesting password reset
-```
+
 
 ## 🔒 Security Notes
 
@@ -151,8 +139,8 @@ Email from fake-bank@suspicious.com requesting password reset
 Edit the `USERS` dictionary in `app.py`:
 ```python
 USERS = {
-    'username': 'password',
-    'newuser': 'newpass123'
+    'username': 'admin',
+    'newuser': 'admin123'
 }
 ```
 
@@ -216,5 +204,6 @@ For improvements or bug fixes, feel free to:
 ---
 
 **Created for Academic Project - Cyber Threat Intelligence Classification**
+
 
 Good luck with your presentation! 🎉

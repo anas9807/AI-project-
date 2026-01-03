@@ -1,0 +1,12 @@
+# Web Framework
+Flask==3.0.0
+
+# Data Processing & AI
+pandas
+numpy
+scikit-learn
+joblib
+
+# Security & Utilities
+python-dotenv
+requests

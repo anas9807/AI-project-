@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTI Login - Cyber Threat Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <svg width="60" height="60" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="28" fill="none" stroke="#00ff88" stroke-width="2"/>
+                    <path d="M30 10 L30 50 M10 30 L50 30" stroke="#00ff88" stroke-width="2"/>
+                    <circle cx="30" cy="30" r="5" fill="#00ff88"/>
+                </svg>
+            </div>
+            <h1>Cyber Threat Intelligence</h1>
+            <p class="subtitle">Classification System</p>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/login">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            
+            <div class="demo-credentials">
+                <p><strong>Demo Credentials:</strong></p>
+                <p>Username: <code>demo</code> | Password: <code>demo123</code></p>
+                <p>Username: <code>admin</code> | Password: <code>admin123</code></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

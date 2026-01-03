@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTI Dashboard - Threat Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-left">
+                <h2>🛡️ CTI System</h2>
+            </div>
+            <div class="nav-right">
+                <span class="user-info">Welcome, <strong>{{ username }}</strong></span>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- Classification Section -->
+            <div class="card card-main">
+                <h3>🔍 Threat Classification</h3>
+                <p class="card-description">Enter threat data or logs to classify the type of cyber threat</p>
+                
+                <textarea id="threatInput" placeholder="Enter threat description, log data, or suspicious content here...&#10;&#10;Example: Received email requesting password reset with suspicious link: http://fake-bank.com/login" rows="8"></textarea>
+                
+                <button onclick="classifyThreat()" class="btn-classify">
+                    <span id="btnText">Classify Threat</span>
+                    <span id="btnLoader" class="loader" style="display:none;"></span>
+                </button>
+                
+                <div id="result" class="result-box" style="display:none;">
+                    <div class="result-header">
+                        <h4>Classification Result</h4>
+                        <span id="timestamp" class="timestamp"></span>
+                    </div>
+                    <div class="result-content">
+                        <div class="threat-badge" id="threatBadge"></div>
+                        <div class="confidence-bar">
+                            <div class="confidence-label">
+                                <span>Confidence</span>
+                                <span id="confidenceValue">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="confidenceProgress" class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="card">
+                <h3>📊 Statistics</h3>
+                <div id="statsContent">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Classifications</span>
+                        <span class="stat-value" id="totalStats">0</span>
+                    </div>
+                    <div id="threatStats"></div>
+                </div>
+                <button onclick="loadStats()" class="btn-secondary">Refresh Stats</button>
+            </div>
+
+            <!-- History Section -->
+            <div class="card card-history">
+                <h3>📜 Classification History</h3>
+                <div id="historyContent" class="history-list">
+                    <p class="empty-state">No classifications yet</p>
+                </div>
+                <button onclick="loadHistory()" class="btn-secondary">Refresh History</button>
+            </div>
+
+            <!-- Threat Info Section -->
+            <div class="card">
+                <h3>ℹ️ Threat Categories</h3>
+                <div class="threat-info">
+                    <div class="info-item">
+                        <span class="badge badge-ddos">DDoS</span>
+                        <span>Distributed Denial of Service attacks</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="badge badge-malware">Malware</span>
+                        <span>Malicious software infections</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="badge badge-xss">XSS</span>
+                        <span>Cross-Site Scripting vulnerabilities</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="badge badge-ransomware">Ransomware</span>
+                        <span>File encryption extortion attacks</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="badge badge-sql">SQL Injection</span>
+                        <span>Database query manipulation</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="badge badge-phishing">Phishing</span>
+                        <span>Social engineering credential theft</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load initial data
+        window.onload = function() {
+            loadStats();
+            loadHistory();
+        };
+
+        async function classifyThreat() {
+            const input = document.getElementById('threatInput').value.trim();
+            
+            if (!input) {
+                alert('Please enter threat data to classify');
+                return;
+            }
+
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const resultBox = document.getElementById('result');
+
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/classify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: input })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResult(data);
+                    loadStats();
+                    loadHistory();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error classifying threat: ' + error.message);
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        }
+
+        function displayResult(data) {
+            const resultBox = document.getElementById('result');
+            const threatBadge = document.getElementById('threatBadge');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const confidenceProgress = document.getElementById('confidenceProgress');
+            const timestamp = document.getElementById('timestamp');
+
+            const badgeClass = 'badge-' + data.threat_type.toLowerCase().replace(' ', '');
+            threatBadge.className = 'threat-badge badge ' + badgeClass;
+            threatBadge.textContent = data.threat_type;
+
+            confidenceValue.textContent = data.confidence + '%';
+            confidenceProgress.style.width = data.confidence + '%';
+
+            timestamp.textContent = data.timestamp;
+
+            resultBox.style.display = 'block';
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/stats');
+                const data = await response.json();
+
+                document.getElementById('totalStats').textContent = data.total;
+
+                const threatStats = document.getElementById('threatStats');
+                if (data.total > 0) {
+                    let html = '';
+                    for (const [type, count] of Object.entries(data.by_type)) {
+                        if (count > 0) {
+                            const badgeClass = 'badge-' + type.toLowerCase().replace(' ', '');
+                            html += `
+                                <div class="stat-item">
+                                    <span class="badge ${badgeClass} badge-small">${type}</span>
+                                    <span class="stat-value">${count}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                    threatStats.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const data = await response.json();
+
+                const historyContent = document.getElementById('historyContent');
+
+                if (data.length === 0) {
+                    historyContent.innerHTML = '<p class="empty-state">No classifications yet</p>';
+                    return;
+                }
+
+                let html = '';
+                data.reverse().forEach(item => {
+                    const badgeClass = 'badge-' + item.threat_type.toLowerCase().replace(' ', '');
+                    html += `
+                        <div class="history-item">
+                            <div class="history-header">
+                                <span class="badge ${badgeClass}">${item.threat_type}</span>
+                                <span class="history-time">${item.timestamp}</span>
+                            </div>
+                            <div class="history-text">${item.text}</div>
+                            <div class="history-confidence">Confidence: ${item.confidence}%</div>
+                        </div>
+                    `;
+                });
+
+                historyContent.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Allow Enter to submit (with Shift+Enter for new line)
+        document.getElementById('threatInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                classifyThreat();
+            }
+        });
+    </script>
+</body>
+</html>
+
